@@ -32,10 +32,9 @@ class InteractionManager {
 
   _getCanvasPos(e) {
     const rect = this.canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    return this.engine.screenToLocal(sx, sy);
   }
 
   /* ===== 点击交互（探索型） ===== */
@@ -214,7 +213,7 @@ class InteractionManager {
       const btn = document.createElement('div');
       btn.className = 'choice-option';
       btn.innerHTML = '<div style="font-weight:600;font-size:13px;">' + opt.label + '</div>' +
-                      '<div style="color:#8b949e;font-size:11px;margin-top:2px;">' + (opt.desc || '') + '</div>';
+                      '<div style="color:#87867f;font-size:11px;margin-top:2px;">' + (opt.desc || '') + '</div>';
       btn.addEventListener('click', () => {
         const allBtns = wrapper.querySelectorAll('.choice-option');
         allBtns.forEach(b => b.classList.remove('selected', 'correct', 'wrong'));

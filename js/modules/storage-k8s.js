@@ -16,40 +16,40 @@ window.K8sModules['storage'] = {
         engine.clear();
 
         engine.drawText('💾 Kubernetes 存储类型', engine.width / 2, 25, {
-          color: '#e6edf3', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#faf9f5', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
         // 三种存储类型卡片
         const types = [
-          { id: 'emptydir', label: 'emptyDir', color: '#58a6ff',
+          { id: 'emptydir', label: 'emptyDir', color: '#d97757',
             desc: '临时存储，随 Pod 删除而删除。用于临时缓存、合并排序等。',
             useCase: '临时工作目录' },
-          { id: 'hostpath', label: 'hostPath', color: '#d29922',
+          { id: 'hostpath', label: 'hostPath', color: '#c49a3c',
             desc: '挂载节点本地文件系统。用于节点级别日志、节点 GPU 驱动等。',
             useCase: '节点级别持久化' },
-          { id: 'pvc', label: 'PersistentVolumeClaim', color: '#3fb950',
+          { id: 'pvc', label: 'PersistentVolumeClaim', color: '#7c9a5e',
             desc: '动态申请的持久化存储，由 PV 提供，不依赖特定节点。',
             useCase: '有状态应用的数据持久化' }
         ];
 
         types.forEach((t, i) => {
           const x = 80 + i * 260;
-          engine.drawRect(x, 60, 220, 140, {
+          engine.drawRect(x, 60, 220, 150, {
             fillColor: t.color + '08', borderColor: t.color, radius: 10
           });
-          engine.drawText(t.label, x + 110, 80, {
+          engine.drawText(t.label, x + 110, 78, {
             color: t.color, fontSize: 13, fontWeight: '600', align: 'center'
           });
-          engine.drawText(t.desc, x + 110, 110, {
-            color: '#8b949e', fontSize: 10, align: 'center'
+          engine.drawText(t.desc, x + 110, 100, {
+            color: '#87867f', fontSize: 10, align: 'center', maxWidth: 200
           });
-          engine.drawText('场景：' + t.useCase, x + 110, 175, {
-            color: '#e6edf3', fontSize: 11, align: 'center'
+          engine.drawText('场景：' + t.useCase, x + 110, 160, {
+            color: '#faf9f5', fontSize: 11, align: 'center', maxWidth: 200
           });
         });
 
         engine.drawText('❓ 场景题：一个 MySQL 数据库需要持久化存储数据，应该使用哪种存储类型？',
-          engine.width / 2, 240, { color: '#e6edf3', fontSize: 13, align: 'center' });
+          engine.width / 2, 240, { color: '#faf9f5', fontSize: 13, align: 'center', maxWidth: 700 });
 
         interactions.enableChoice(
           [
@@ -66,7 +66,7 @@ window.K8sModules['storage'] = {
                 4000);
               setTimeout(() => app.onChallengeComplete('storage', 0, false), 1500);
             } else {
-              app.showFeedback('error', '❌ 数据库需要持久化存储。emptyDir 会随 Pod 删除丢失，hostPath 依赖单节点。', 3000);
+              app.showFeedback('error', '❌ 数据库需要持久化存储。emptyDir 会随 Pod 删除丢失，hostPath 依赖单节点。', 1500);
             }
           }
         );
@@ -82,23 +82,23 @@ window.K8sModules['storage'] = {
         engine.clear();
 
         engine.drawText('📦 StorageClass 动态供应', engine.width / 2, 25, {
-          color: '#e6edf3', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#faf9f5', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
         // PVC 申请
         engine.drawRect(80, 60, 300, 80, {
-          fillColor: '#d2a8ff11', borderColor: '#d2a8ff', radius: 8
+          fillColor: '#a08bb511', borderColor: '#a08bb5', radius: 8
         });
         engine.drawText('PVC 申请', 230, 78, {
-          color: '#d2a8ff', fontSize: 12, fontWeight: '600', align: 'center'
+          color: '#a08bb5', fontSize: 12, fontWeight: '600', align: 'center'
         });
         engine.drawText('storageClassName: "fast-storage"\nrequest: 10Gi | accessMode: ReadWriteOnce', 230, 102, {
-          color: '#8b949e', fontSize: 10, align: 'center'
+          color: '#87867f', fontSize: 10, align: 'center', maxWidth: 280
         });
 
         // StorageClass 选项
         engine.drawText('选择正确的 StorageClass 配置：', 80, 170, {
-          color: '#e6edf3', fontSize: 12
+          color: '#faf9f5', fontSize: 12
         });
 
         interactions.enableChoice(
@@ -137,23 +137,23 @@ window.K8sModules['storage'] = {
         engine.clear();
 
         engine.drawText('🔗 PVC 绑定与挂载', engine.width / 2, 25, {
-          color: '#e6edf3', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#faf9f5', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
         // PV 池
         engine.drawRect(40, 60, 200, 200, {
-          fillColor: '#0d1117', borderColor: '#484f58', radius: 10
+          fillColor: '#141413', borderColor: '#5e5d59', radius: 10
         });
         engine.drawText('PV 池', 140, 78, {
-          color: '#8b949e', fontSize: 12, fontWeight: '600', align: 'center'
+          color: '#87867f', fontSize: 12, fontWeight: '600', align: 'center'
         });
 
         const pvs = [
-          { id: 'pv1', label: 'PV-5Gi-RWO', x: 70, y: 110, w: 140, h: 35, color: '#3fb950',
+          { id: 'pv1', label: 'PV-5Gi-RWO', x: 60, y: 110, w: 160, h: 40, color: '#7c9a5e',
             size: '5Gi', access: 'RWO', status: '未绑定' },
-          { id: 'pv2', label: 'PV-10Gi-RWX', x: 70, y: 160, w: 140, h: 35, color: '#f85149',
+          { id: 'pv2', label: 'PV-10Gi-RWX', x: 60, y: 160, w: 160, h: 40, color: '#b53333',
             size: '10Gi', access: 'RWX', status: '已绑定' },
-          { id: 'pv3', label: 'PV-20Gi-RWO', x: 70, y: 210, w: 140, h: 35, color: '#d29922',
+          { id: 'pv3', label: 'PV-20Gi-RWO', x: 60, y: 210, w: 160, h: 40, color: '#c49a3c',
             size: '20Gi', access: 'RWO', status: '未绑定' }
         ];
 
@@ -162,23 +162,23 @@ window.K8sModules['storage'] = {
             fillColor: pv.color + '11', borderColor: pv.color, radius: 6,
             id: pv.id, interactive: true, data: pv
           });
-          engine.drawText(pv.label, pv.x + pv.w / 2, pv.y + 12, {
+          engine.drawText(pv.label, pv.x + pv.w / 2, pv.y + 13, {
             color: pv.color, fontSize: 10, fontWeight: '600', align: 'center'
           });
-          engine.drawText(pv.size + ' | ' + pv.access + ' | ' + pv.status, pv.x + pv.w / 2, pv.y + 26, {
-            color: '#8b949e', fontSize: 9, align: 'center'
+          engine.drawText(pv.size + ' | ' + pv.access + ' | ' + pv.status, pv.x + pv.w / 2, pv.y + 28, {
+            color: '#87867f', fontSize: 9, align: 'center', maxWidth: pv.w - 10
           });
         });
 
         // 箭头
-        engine.drawArrow(240, 150, 300, 150, { color: '#30363d', dashed: [3, 3] });
+        engine.drawArrow(240, 150, 300, 150, { color: '#5e5d59', dashed: [3, 3] });
 
         // Pod
         engine.drawRect(320, 80, 200, 160, {
-          fillColor: '#0d1117', borderColor: '#58a6ff', radius: 10
+          fillColor: '#141413', borderColor: '#d97757', radius: 10
         });
         engine.drawText('Pod (mysql)', 420, 98, {
-          color: '#58a6ff', fontSize: 12, fontWeight: '600', align: 'center'
+          color: '#d97757', fontSize: 12, fontWeight: '600', align: 'center'
         });
 
         // PVC 目标
@@ -189,20 +189,20 @@ window.K8sModules['storage'] = {
         };
 
         engine.drawRect(pvcTarget.x, pvcTarget.y, pvcTarget.w, pvcTarget.h, {
-          fillColor: '#d2a8ff11', borderColor: '#d2a8ff', radius: 6,
+          fillColor: '#a08bb511', borderColor: '#a08bb5', radius: 6,
           id: pvcTarget.id, interactive: true, data: pvcTarget
         });
         engine.drawText('拖入 PVC\n(请求 5Gi, RWO)', pvcTarget.x + pvcTarget.w / 2, pvcTarget.y + pvcTarget.h / 2, {
-          color: '#d2a8ff', fontSize: 11, align: 'center', baseline: 'middle'
+          color: '#a08bb5', fontSize: 11, align: 'center', baseline: 'middle'
         });
 
         // 挂载点
         engine.drawText('挂载到容器', 420, 200, {
-          color: '#8b949e', fontSize: 10, align: 'center'
+          color: '#87867f', fontSize: 10, align: 'center'
         });
 
         // 可拖拽 PVC
-        const pvc = { id: 'pvc', label: 'PVC (5Gi, RWO)', x: 560, y: 130, w: 150, h: 50, color: '#d2a8ff' };
+        const pvc = { id: 'pvc', label: 'PVC (5Gi, RWO)', x: 560, y: 130, w: 150, h: 50, color: '#a08bb5' };
         engine.drawNode(pvc.x, pvc.y, pvc.w, pvc.h, pvc.label, {
           id: pvc.id, borderColor: pvc.color, bgColor: pvc.color + '11',
           interactive: true, data: pvc
@@ -210,25 +210,25 @@ window.K8sModules['storage'] = {
 
         // 提示
         engine.drawRect(40, 300, 700, 60, {
-          fillColor: '#161b22', borderColor: '#30363d', radius: 8
+          fillColor: '#30302e', borderColor: '#5e5d59', radius: 8
         });
         engine.drawText('💡 提示：PVC 会根据容量和访问模式自动匹配 PV（大小 >= 请求，且 accessMode 兼容）。', 50, 315, {
-          color: '#8b949e', fontSize: 11
+          color: '#87867f', fontSize: 11, maxWidth: 680
         });
         engine.drawText('PVC (5Gi, RWO) 会绑定到 PV-5Gi-RWO（5Gi >= 5Gi 且 RWO ⊆ RWO）。', 50, 335, {
-          color: '#8b949e', fontSize: 11
+          color: '#87867f', fontSize: 11, maxWidth: 680
         });
 
         interactions.enableDrag([pvc], [pvcTarget], {
           onDrop(sourceId, targetId, correct) {
             if (correct) {
-              animations.emitParticles(engine, pvcTarget.x + pvcTarget.w / 2, pvcTarget.y + pvcTarget.h / 2, '#d2a8ff', 20);
+              animations.emitParticles(engine, pvcTarget.x + pvcTarget.w / 2, pvcTarget.y + pvcTarget.h / 2, '#a08bb5', 20);
               app.showFeedback('success',
                 '✅ PVC 成功绑定到 PV-5Gi-RWO！StorageClass 动态创建了 PV，PVC 和 PV 绑定后挂载到容器。',
                 4000);
               setTimeout(() => app.onChallengeComplete('storage', 2, false), 2000);
             } else {
-              app.showFeedback('error', '❌ 绑定失败！PVC 的访问模式（ReadWriteOnce）和容量需求决定了它只能绑定到兼容的 PV。', 3000);
+              app.showFeedback('error', '❌ 绑定失败！PVC 的访问模式（ReadWriteOnce）和容量需求决定了它只能绑定到兼容的 PV。', 1500);
             }
           }
         });
@@ -244,73 +244,79 @@ window.K8sModules['storage'] = {
         engine.clear();
 
         engine.drawText('🔄 数据生命周期与回收策略', engine.width / 2, 25, {
-          color: '#e6edf3', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#faf9f5', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
         // Pod 删除前
-        engine.drawRect(40, 60, 220, 120, {
-          fillColor: '#0d1117', borderColor: '#58a6ff', radius: 10
+        engine.drawRect(40, 60, 220, 130, {
+          fillColor: '#141413', borderColor: '#d97757', radius: 10
         });
         engine.drawText('Pod 运行时', 150, 78, {
-          color: '#58a6ff', fontSize: 12, fontWeight: '600', align: 'center'
+          color: '#d97757', fontSize: 12, fontWeight: '600', align: 'center'
         });
-        engine.drawText('MySQL Pod 正在使用 PV\n数据目录：/var/lib/mysql\n数据已写入 100MB', 150, 108, {
-          color: '#8b949e', fontSize: 10, align: 'center'
+        engine.drawText('MySQL Pod 正在使用 PV', 150, 102, {
+          color: '#87867f', fontSize: 10, align: 'center', maxWidth: 200
+        });
+        engine.drawText('数据目录：/var/lib/mysql', 150, 116, {
+          color: '#87867f', fontSize: 10, align: 'center', maxWidth: 200
+        });
+        engine.drawText('数据已写入 100MB', 150, 130, {
+          color: '#87867f', fontSize: 10, align: 'center'
         });
 
         // 删除箭头
-        engine.drawText('Pod 被删除 ↓', 150, 195, {
-          color: '#f85149', fontSize: 12, align: 'center'
+        engine.drawText('Pod 被删除 ↓', 150, 205, {
+          color: '#b53333', fontSize: 12, align: 'center'
         });
-        engine.drawLine(150, 180, 150, 200, { color: '#f85149', width: 2 });
+        engine.drawLine(150, 190, 150, 210, { color: '#b53333', width: 2 });
 
         // 三种回收策略
         const policies = [
-          { id: 'retain', label: 'Retain', color: '#d29922',
-            desc: '保留数据，PV 变为 Released 状态\n需要手动删除 PV 和数据',
+          { id: 'retain', label: 'Retain', color: '#c49a3c',
+            desc: '保留数据，PV 变为 Released，需手动清理',
             outcome: '数据保留，可恢复' },
-          { id: 'delete', label: 'Delete', color: '#f85149',
-            desc: '删除 PV，云盘等存储资源也被删除\n数据无法恢复',
+          { id: 'delete', label: 'Delete', color: '#b53333',
+            desc: '删除 PV 和底层存储，数据无法恢复',
             outcome: '数据永久丢失' },
-          { id: 'recycle', label: 'Recycle', color: '#3fb950',
-            desc: '删除数据但保留 PV，PV 变为 Available\n可被新 PVC 重新绑定',
+          { id: 'recycle', label: 'Recycle', color: '#7c9a5e',
+            desc: '清除数据但保留 PV，可被新 PVC 绑定',
             outcome: '数据清除，PV 可复用' }
         ];
 
         policies.forEach((p, i) => {
           const x = 60 + i * 240;
-          engine.drawRect(x, 230, 200, 120, {
+          engine.drawRect(x, 230, 200, 110, {
             fillColor: p.color + '08', borderColor: p.color, radius: 10,
             id: p.id, interactive: true, data: p
           });
-          engine.drawText(p.label, x + 100, 250, {
+          engine.drawText(p.label, x + 100, 248, {
             color: p.color, fontSize: 14, fontWeight: '600', align: 'center'
           });
-          engine.drawText(p.desc, x + 100, 280, {
-            color: '#8b949e', fontSize: 10, align: 'center'
+          engine.drawText(p.desc, x + 100, 272, {
+            color: '#87867f', fontSize: 10, align: 'center', maxWidth: 180
           });
-          engine.drawText('结果：' + p.outcome, x + 100, 330, {
-            color: p.color, fontSize: 10, fontWeight: '600', align: 'center'
+          engine.drawText('结果：' + p.outcome, x + 100, 318, {
+            color: p.color, fontSize: 10, fontWeight: '600', align: 'center', maxWidth: 180
           });
         });
 
-        engine.drawText('❓ 如果 PVC 的回收策略是 Delete，删除 Pod 后数据会怎样？', 400, 380, {
-          color: '#e6edf3', fontSize: 12, align: 'center'
+        engine.drawText('❓ 如果 PVC 的回收策略是 Delete，删除 Pod 后数据会怎样？', engine.width / 2, 370, {
+          color: '#faf9f5', fontSize: 12, align: 'center', maxWidth: 700
         });
 
         const policyIds = policies.map(p => p.id);
         interactions.onClick(policyIds, (id, data) => {
           if (id === 'delete') {
-            animations.emitParticles(engine, 160, 290, '#f85149', 15);
+            animations.emitParticles(engine, 160, 290, '#b53333', 15);
             app.showFeedback('success',
               '✅ 正确！Delete 策略会删除 PV 和底层存储资源（如云盘），数据永久丢失，无法恢复。' +
               '生产环境重要数据应使用 Retain 策略或开启快照备份。',
               4000);
             setTimeout(() => app.onChallengeComplete('storage', 3, false), 1500);
           } else if (id === 'retain') {
-            app.showFeedback('error', '❌ Retain 策略会保留数据，不是 Delete。', 3000);
+            app.showFeedback('error', '❌ Retain 策略会保留数据，不是 Delete。', 1500);
           } else {
-            app.showFeedback('error', '❌ Recycle 会删除数据但保留 PV，也不是 Delete。', 3000);
+            app.showFeedback('error', '❌ Recycle 会删除数据但保留 PV，也不是 Delete。', 1500);
           }
         });
       }

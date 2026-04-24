@@ -6,11 +6,17 @@ class CanvasEngine {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
+    this.animCanvas = document.getElementById('anim-canvas');
+    this.animCtx = this.animCanvas.getContext('2d');
     this.elements = [];
     this.dpr = window.devicePixelRatio || 1;
+    this.scale = 1;
     this.offsetX = 0;
     this.offsetY = 0;
     this._resizeHandler = null;
+    // Virtual design dimensions — modules render in this space
+    this.REF_W = 800;
+    this.REF_H = 480;
   }
 
   init() {
@@ -29,17 +35,58 @@ class CanvasEngine {
 
   resize() {
     const rect = this.canvas.parentElement.getBoundingClientRect();
-    this.width = rect.width;
-    this.height = rect.height;
-    this.canvas.width = this.width * this.dpr;
-    this.canvas.height = this.height * this.dpr;
-    this.canvas.style.width = this.width + 'px';
-    this.canvas.style.height = this.height + 'px';
-    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    const parentW = rect.width;
+    const parentH = rect.height;
+
+    this.canvas.width = parentW * this.dpr;
+    this.canvas.height = parentH * this.dpr;
+    this.canvas.style.width = parentW + 'px';
+    this.canvas.style.height = parentH + 'px';
+
+    // Uniform scale to fit virtual design into actual area
+    this.scale = Math.min(parentW / this.REF_W, parentH / this.REF_H);
+    const renderW = this.REF_W * this.scale;
+    const renderH = this.REF_H * this.scale;
+    this.offsetX = (parentW - renderW) / 2;
+    this.offsetY = (parentH - renderH) / 2;
+
+    // Report virtual dimensions so modules see a consistent coordinate space
+    this.width = this.REF_W;
+    this.height = this.REF_H;
+
+    // Combined transform: DPR × scale + centering offset
+    this.ctx.setTransform(
+      this.dpr * this.scale, 0,
+      0, this.dpr * this.scale,
+      this.offsetX * this.dpr,
+      this.offsetY * this.dpr
+    );
+
+    // Match animation overlay size and transform
+    this.animCanvas.width = parentW * this.dpr;
+    this.animCanvas.height = parentH * this.dpr;
+    this.animCanvas.style.width = parentW + 'px';
+    this.animCanvas.style.height = parentH + 'px';
+    this.animCtx.setTransform(
+      this.dpr * this.scale, 0,
+      0, this.dpr * this.scale,
+      this.offsetX * this.dpr,
+      this.offsetY * this.dpr
+    );
   }
 
   clear() {
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    // Clear in physical pixel space to cover the entire canvas
+    this.ctx.save();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.restore();
+
+    // Also clear animation overlay
+    this.animCtx.save();
+    this.animCtx.setTransform(1, 0, 0, 1, 0, 0);
+    this.animCtx.clearRect(0, 0, this.animCanvas.width, this.animCanvas.height);
+    this.animCtx.restore();
     this.elements = [];
   }
 
@@ -87,21 +134,33 @@ class CanvasEngine {
 
   drawText(text, x, y, options = {}) {
     const ctx = this.ctx;
+    const fontSize = options.fontSize || 12;
     ctx.save();
-    ctx.font = (options.fontWeight || 'normal') + ' ' + (options.fontSize || 12) + 'px -apple-system, "Noto Sans SC", sans-serif';
-    ctx.fillStyle = options.color || '#e6edf3';
+    ctx.font = (options.fontWeight || 'normal') + ' ' + fontSize + 'px Arial, system-ui, "Noto Sans SC", sans-serif';
+    ctx.fillStyle = options.color || '#faf9f5';
     ctx.textAlign = options.align || 'left';
     ctx.textBaseline = options.baseline || 'top';
+
+    if (options.maxWidth) {
+      const lines = this._wrapText(ctx, text, options.maxWidth);
+      const lineHeight = fontSize + 3;
+      lines.forEach((line, i) => {
+        ctx.fillText(line, x, y + i * lineHeight);
+      });
+      ctx.restore();
+      return this._registerElement('text', x, y, options.maxWidth, lines.length * lineHeight, options);
+    }
+
     ctx.fillText(text, x, y);
     ctx.restore();
     const metrics = ctx.measureText(text);
-    return this._registerElement('text', x, y, metrics.width, options.fontSize || 12, options);
+    return this._registerElement('text', x, y, metrics.width, fontSize, options);
   }
 
   drawLine(x1, y1, x2, y2, options = {}) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.strokeStyle = options.color || '#30363d';
+    ctx.strokeStyle = options.color || '#5e5d59';
     ctx.lineWidth = options.width || 1;
     if (options.dashed) ctx.setLineDash(options.dashed);
     ctx.beginPath();
@@ -113,7 +172,7 @@ class CanvasEngine {
 
   drawArrow(x1, y1, x2, y2, options = {}) {
     const ctx = this.ctx;
-    const color = options.color || '#30363d';
+    const color = options.color || '#5e5d59';
     const headLen = options.headLen || 8;
     const angle = Math.atan2(y2 - y1, x2 - x1);
 
@@ -138,7 +197,7 @@ class CanvasEngine {
 
   drawCurvedArrow(x1, y1, x2, y2, options = {}) {
     const ctx = this.ctx;
-    const color = options.color || '#30363d';
+    const color = options.color || '#5e5d59';
     const headLen = options.headLen || 8;
     const curvature = options.curvature || 0.3;
 
@@ -172,41 +231,67 @@ class CanvasEngine {
   /* ===== 复合组件 ===== */
 
   drawNode(x, y, w, h, label, options = {}) {
-    const borderColor = options.borderColor || '#58a6ff';
-    const bgColor = options.bgColor || 'rgba(31, 111, 235, 0.1)';
-    const textColor = options.textColor || '#e6edf3';
+    const borderColor = options.borderColor || '#d97757';
+    const bgColor = options.bgColor || 'rgba(217, 119, 87, 0.1)';
+    const textColor = options.textColor || '#faf9f5';
     const subLabel = options.subLabel || '';
+    const fontSize = options.fontSize || 12;
 
-    this.drawRect(x, y, w, h, {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.font = '600 ' + fontSize + 'px Arial, system-ui, "Noto Sans SC", sans-serif';
+    const maxTextWidth = w - 16;
+    const lines = this._wrapText(ctx, label, maxTextWidth);
+    const lineHeight = fontSize + 3;
+    const textBlockHeight = lines.length * lineHeight;
+
+    // Adjust box height if text needs more room
+    let actualH = h;
+    if (subLabel) {
+      actualH = Math.max(h, textBlockHeight + 28);
+    } else {
+      actualH = Math.max(h, textBlockHeight + 12);
+    }
+
+    this.drawRect(x, y, w, actualH, {
       fillColor: bgColor,
       borderColor: borderColor,
       borderWidth: options.borderWidth || 1.5,
       radius: 8
     });
 
-    this.drawText(label, x + w / 2, y + (subLabel ? 10 : h / 2 - 6), {
-      color: textColor,
-      fontSize: options.fontSize || 12,
-      fontWeight: '600',
-      align: 'center',
-      baseline: subLabel ? 'top' : 'middle'
-    });
+    // Draw wrapped label lines, centered vertically
+    let textStartY;
+    if (subLabel) {
+      textStartY = y + (actualH - 18 - textBlockHeight) / 2 + 2;
+    } else {
+      textStartY = y + (actualH - textBlockHeight) / 2;
+    }
+    for (let i = 0; i < lines.length; i++) {
+      this.drawText(lines[i], x + w / 2, textStartY + i * lineHeight, {
+        color: textColor,
+        fontSize: fontSize,
+        fontWeight: '600',
+        align: 'center',
+        baseline: 'top'
+      });
+    }
 
     if (subLabel) {
-      this.drawText(subLabel, x + w / 2, y + h - 18, {
-        color: '#8b949e',
+      this.drawText(subLabel, x + w / 2, y + actualH - 18, {
+        color: '#87867f',
         fontSize: 9,
         align: 'center',
         baseline: 'top'
       });
     }
 
-    return this._registerElement('node', x, y, w, h, { ...options, label });
+    return this._registerElement('node', x, y, w, actualH, { ...options, label });
   }
 
   drawProgressBar(x, y, w, h, progress, options = {}) {
-    const bgColor = options.bgColor || '#21262d';
-    const fillColor = options.fillColor || '#58a6ff';
+    const bgColor = options.bgColor || '#3d3d3a';
+    const fillColor = options.fillColor || '#c96442';
 
     this.drawRect(x, y, w, h, { fillColor: bgColor, radius: h / 2 });
     if (progress > 0) {
@@ -219,7 +304,7 @@ class CanvasEngine {
     const padding = 6;
     const ctx = this.ctx;
     ctx.save();
-    ctx.font = '600 10px -apple-system, "Noto Sans SC", sans-serif';
+    ctx.font = '600 10px Arial, system-ui, "Noto Sans SC", sans-serif';
     const metrics = ctx.measureText(text);
     const w = metrics.width + padding * 2;
     const h = 18;
@@ -252,7 +337,48 @@ class CanvasEngine {
     return null;
   }
 
+  /** Convert screen (CSS pixel) coordinates to virtual design coordinates */
+  screenToLocal(sx, sy) {
+    return {
+      x: (sx - this.offsetX) / this.scale,
+      y: (sy - this.offsetY) / this.scale
+    };
+  }
+
+  /** Convert virtual design coordinates back to screen (CSS pixel) coordinates */
+  localToScreen(lx, ly) {
+    return {
+      x: lx * this.scale + this.offsetX,
+      y: ly * this.scale + this.offsetY
+    };
+  }
+
   /* ===== 内部方法 ===== */
+
+  _wrapText(ctx, text, maxWidth) {
+    if (maxWidth <= 0) return [text];
+    const lines = [];
+    // First split on existing newlines
+    const paragraphs = text.split('\n');
+    for (const para of paragraphs) {
+      if (ctx.measureText(para).width <= maxWidth) {
+        lines.push(para);
+        continue;
+      }
+      let current = '';
+      for (const ch of para) {
+        const test = current + ch;
+        if (ctx.measureText(test).width > maxWidth && current.length > 0) {
+          lines.push(current);
+          current = ch;
+        } else {
+          current = test;
+        }
+      }
+      if (current) lines.push(current);
+    }
+    return lines.length > 0 ? lines : [text];
+  }
 
   _roundRect(x, y, w, h, r) {
     const ctx = this.ctx;

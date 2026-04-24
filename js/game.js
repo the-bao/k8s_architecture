@@ -29,10 +29,10 @@ const Game = {
         currentModule: 'architecture',
         modules: {
           architecture: { unlocked: true, challenges: {} },
-          'pod-lifecycle': { unlocked: false, challenges: {} },
-          network: { unlocked: false, challenges: {} },
-          storage: { unlocked: false, challenges: {} },
-          security: { unlocked: false, challenges: {} }
+          'pod-lifecycle': { unlocked: true, challenges: {} },
+          network: { unlocked: true, challenges: {} },
+          storage: { unlocked: true, challenges: {} },
+          security: { unlocked: true, challenges: {} }
         }
       };
     }
@@ -119,7 +119,7 @@ const Game = {
   },
 
   isModuleUnlocked(moduleId) {
-    return this.state.modules[moduleId]?.unlocked === true;
+    return true;
   },
 
   getTotalProgress() {

@@ -13,17 +13,17 @@ const App = {
   MODULE_ORDER: ['architecture', 'pod-lifecycle', 'network', 'storage', 'security'],
 
   MODULE_META: {
-    'architecture': { title: '整体架构总览', icon: '🏛', color: '#58a6ff', challenges: 4 },
-    'pod-lifecycle': { title: 'Pod 创建流程', icon: '📦', color: '#d2a8ff', challenges: 5 },
-    'network': { title: '网络架构', icon: '🌐', color: '#3fb950', challenges: 5 },
-    'storage': { title: '存储架构', icon: '💾', color: '#f0883e', challenges: 4 },
-    'security': { title: '安全与可观测', icon: '🔒', color: '#f85149', challenges: 4 }
+    'architecture': { title: '整体架构总览', icon: '🏛', color: '#d97757', challenges: 4 },
+    'pod-lifecycle': { title: 'Pod 创建流程', icon: '📦', color: '#a08bb5', challenges: 5 },
+    'network': { title: '网络架构', icon: '🌐', color: '#7c9a5e', challenges: 5 },
+    'storage': { title: '存储架构', icon: '💾', color: '#c96442', challenges: 4 },
+    'security': { title: '安全与可观测', icon: '🔒', color: '#b53333', challenges: 4 }
   },
 
   init() {
     Game.init();
     this.engine = new CanvasEngine('main-canvas').init();
-    this.animations = new AnimationManager();
+    this.animations = new AnimationManager(this.engine);
     this.interactions = new InteractionManager(this.engine, this.animations);
 
     this.renderSidebar();
@@ -45,7 +45,6 @@ const App = {
       const item = document.createElement('div');
       item.className = 'module-item' +
         (isActive ? ' active' : '') +
-        (!unlocked ? ' locked' : '') +
         (progress >= 1 ? ' completed' : '');
 
       item.innerHTML =
@@ -57,14 +56,11 @@ const App = {
           '<span class="module-progress-text">' + Math.round(progress * 100) + '%</span>' +
         '</div>' +
         '<div class="module-status ' +
-          (progress >= 1 ? 'completed' : '') +
-          (!unlocked ? 'locked' : '') + '">' +
-          (progress >= 1 ? '✓ 已完成' : (!unlocked ? '🔒 未解锁' : Math.round(progress * 100) + '%')) +
+          (progress >= 1 ? 'completed' : '') + '">' +
+          (progress >= 1 ? '✓ 已完成' : Math.round(progress * 100) + '%') +
         '</div>';
 
-      if (unlocked) {
-        item.addEventListener('click', () => this.navigate(modId));
-      }
+      item.addEventListener('click', () => this.navigate(modId));
 
       list.appendChild(item);
     }
@@ -76,9 +72,9 @@ const App = {
       sum + Object.keys(m.challenges).filter(k => m.challenges[k].completed).length, 0);
 
     stats.innerHTML =
-      '<div style="color:#d2a8ff;font-size:12px;margin-bottom:4px;">' + completedModules + '/5 模块</div>' +
-      '<div style="color:#3fb950;font-size:12px;margin-bottom:4px;">' + totalChallenges + '/22 挑战</div>' +
-      '<div style="color:#8b949e;font-size:12px;">总进度 ' + Math.round(totalProgress * 100) + '%</div>';
+      '<div style="color:#d97757;font-size:12px;margin-bottom:4px;">' + completedModules + '/5 模块</div>' +
+      '<div style="color:#7c9a5e;font-size:12px;margin-bottom:4px;">' + totalChallenges + '/22 挑战</div>' +
+      '<div style="color:#87867f;font-size:12px;">总进度 ' + Math.round(totalProgress * 100) + '%</div>';
   },
 
   updateStatusBar() {
@@ -91,8 +87,6 @@ const App = {
   },
 
   navigate(moduleId) {
-    if (!Game.isModuleUnlocked(moduleId)) return;
-
     // 如果点击同一模块且在挑战中，返回模块概览（不退出挑战）
     if (this.currentModule === moduleId && this.currentChallenge !== null) {
       this._renderModuleOverview(moduleId);
@@ -112,6 +106,8 @@ const App = {
     document.getElementById('tooltip-bubble').classList.add('hidden');
     document.getElementById('btn-start').classList.remove('hidden');
     document.getElementById('btn-learn').classList.remove('hidden');
+    document.getElementById('btn-prev').classList.add('hidden');
+    document.getElementById('btn-next').classList.add('hidden');
 
     this._renderModuleOverview(moduleId);
   },
@@ -125,11 +121,12 @@ const App = {
 
     const challenge = mod.challenges[challengeIndex];
     document.getElementById('challenge-card').classList.remove('hidden');
-    document.getElementById('challenge-title').textContent = '🎯 挑战 ' + (challengeIndex + 1) + '：' + challenge.title;
+    document.getElementById('challenge-title').textContent = '🎯 挑战 ' + (challengeIndex + 1) + '/' + mod.challenges.length + '：' + challenge.title;
     document.getElementById('challenge-desc').textContent = challenge.description;
     document.getElementById('challenge-actions').innerHTML = '';
     document.getElementById('btn-start').classList.add('hidden');
     document.getElementById('btn-learn').classList.add('hidden');
+    this._updateNavButtons();
 
     challenge.render(this.engine, this.animations, this.interactions, this);
 
@@ -137,7 +134,7 @@ const App = {
     this.interactions.enable();
   },
 
-  showFeedback(type, message, duration = 3000) {
+  showFeedback(type, message, duration = 2000) {
     const bubble = document.getElementById('feedback-bubble');
     const icon = document.getElementById('feedback-icon');
     const text = document.getElementById('feedback-text');
@@ -156,8 +153,9 @@ const App = {
     const tip = document.getElementById('tooltip-bubble');
     document.getElementById('tooltip-title').textContent = title;
     document.getElementById('tooltip-text').textContent = text;
-    tip.style.left = (x + 15) + 'px';
-    tip.style.top = (y - 10) + 'px';
+    const screen = this.engine.localToScreen(x, y);
+    tip.style.left = (screen.x + 15) + 'px';
+    tip.style.top = (screen.y - 10) + 'px';
     tip.classList.remove('hidden');
   },
 
@@ -174,17 +172,29 @@ const App = {
       ? '+' + result.totalXP + ' 经验（含首次通关奖励）'
       : '+100 经验';
 
-    this.showFeedback('success', '太棒了！挑战完成！' + xpMsg, 4000);
+    this.showFeedback('success', '太棒了！挑战完成！' + xpMsg, 2500);
 
     const mod = window.K8sModules[moduleId];
     if (mod && challengeIndex + 1 < mod.challenges.length) {
       setTimeout(() => this.startChallenge(challengeIndex + 1), 2500);
     } else {
       setTimeout(() => {
-        this.showFeedback('success', '🎉 模块完成！', 3000);
+        this.showFeedback('success', '🎉 模块完成！', 2500);
         this.navigate(moduleId);
       }, 2500);
     }
+  },
+
+  _updateNavButtons() {
+    const mod = window.K8sModules[this.currentModule];
+    if (!mod || this.currentChallenge === null) {
+      document.getElementById('btn-prev').classList.add('hidden');
+      document.getElementById('btn-next').classList.add('hidden');
+      return;
+    }
+    const total = mod.challenges.length;
+    document.getElementById('btn-prev').classList.toggle('hidden', this.currentChallenge <= 0);
+    document.getElementById('btn-next').classList.toggle('hidden', this.currentChallenge >= total - 1);
   },
 
   _renderModuleOverview(moduleId) {
@@ -205,14 +215,14 @@ const App = {
     });
 
     this.engine.drawText(mod.description || '', cx, cy - 20, {
-      color: '#8b949e',
+      color: '#87867f',
       fontSize: 14,
       align: 'center',
       baseline: 'middle'
     });
 
     this.engine.drawText('共 ' + mod.challenges.length + ' 个挑战 | 点击「开始挑战」继续', cx, cy + 20, {
-      color: '#484f58',
+      color: '#5e5d59',
       fontSize: 12,
       align: 'center',
       baseline: 'middle'
@@ -230,6 +240,15 @@ const App = {
     this.animations.clear();
     this.interactions.destroy();
     this.engine.clear();
+
+    // Remove any dynamically added DOM elements from canvas-container
+    const container = document.getElementById('canvas-container');
+    const keepIds = new Set(['main-canvas', 'anim-canvas', 'feedback-bubble', 'tooltip-bubble']);
+    Array.from(container.children).forEach(child => {
+      if (!keepIds.has(child.id)) {
+        child.remove();
+      }
+    });
   },
 
   _bindButtons() {
@@ -240,9 +259,21 @@ const App = {
     });
 
     document.getElementById('btn-learn').addEventListener('click', () => {
-      // "先学习" 显示模块概述（复习知识点）
       if (this.currentModule) {
         this._renderModuleOverview(this.currentModule);
+      }
+    });
+
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      if (this.currentChallenge !== null && this.currentChallenge > 0) {
+        this.startChallenge(this.currentChallenge - 1);
+      }
+    });
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+      const mod = window.K8sModules[this.currentModule];
+      if (this.currentChallenge !== null && mod && this.currentChallenge < mod.challenges.length - 1) {
+        this.startChallenge(this.currentChallenge + 1);
       }
     });
   }

@@ -12,7 +12,7 @@
   <!-- 顶部状态栏 -->
   <header id="status-bar">
     <div class="status-left">
-      <span class="logo">☸ K8s Architect</span>
+      <span class="logo"><span class="logo-mark">☸</span> K8s Architect</span>
       <span class="tagline">交互式架构学习</span>
     </div>
     <div class="status-right">
@@ -37,34 +37,36 @@
 
     <!-- 主内容区 -->
     <main id="main-content">
-      <div id="canvas-container">
-        <canvas id="main-canvas"></canvas>
-      </div>
-
-      <!-- 挑战卡（右上角覆盖） -->
+      <!-- 挑战卡（顶部栏） -->
       <div id="challenge-card" class="challenge-card hidden">
         <div id="challenge-title" class="challenge-title"></div>
         <div id="challenge-desc" class="challenge-desc"></div>
         <div id="challenge-actions" class="challenge-actions"></div>
       </div>
 
-      <!-- 反馈气泡 -->
-      <div id="feedback-bubble" class="feedback-bubble hidden">
-        <div id="feedback-icon" class="feedback-icon"></div>
-        <div id="feedback-text" class="feedback-text"></div>
-      </div>
-
-      <!-- 知识点气泡 -->
-      <div id="tooltip-bubble" class="tooltip-bubble hidden">
-        <div id="tooltip-title" class="tooltip-title"></div>
-        <div id="tooltip-text" class="tooltip-text"></div>
+      <!-- 画布区域 -->
+      <div id="canvas-container">
+        <canvas id="main-canvas"></canvas>
+        <canvas id="anim-canvas"></canvas>
+        <!-- 反馈气泡（覆盖在 canvas 上） -->
+        <div id="feedback-bubble" class="feedback-bubble hidden">
+          <div id="feedback-icon" class="feedback-icon"></div>
+          <div id="feedback-text" class="feedback-text"></div>
+        </div>
+        <!-- 知识点气泡 -->
+        <div id="tooltip-bubble" class="tooltip-bubble hidden">
+          <div id="tooltip-title" class="tooltip-title"></div>
+          <div id="tooltip-text" class="tooltip-text"></div>
+        </div>
       </div>
 
       <!-- 底部操作栏 -->
       <div id="bottom-bar" class="bottom-bar">
+        <button id="btn-prev" class="btn btn-secondary hidden">◀ 上一关</button>
         <button id="btn-start" class="btn btn-primary">▶ 开始挑战</button>
         <button id="btn-learn" class="btn btn-secondary">📖 先学习</button>
         <button id="btn-reset" class="btn btn-secondary">🔄 重置</button>
+        <button id="btn-next" class="btn btn-secondary hidden">下一关 ▶</button>
       </div>
     </main>
   </div>

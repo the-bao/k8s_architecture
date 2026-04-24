@@ -18,28 +18,28 @@ window.K8sModules['architecture'] = {
         engine.clear();
 
         const components = [
-          { id: 'apiserver', label: 'kube-apiserver', x: 120, y: 80, w: 160, h: 56, color: '#58a6ff',
+          { id: 'apiserver', label: 'kube-apiserver', x: 120, y: 80, w: 160, h: 56, color: '#d97757',
             info: 'API Server 是集群的入口。所有组件（kubectl、scheduler、controller-manager、kubelet）都通过它通信。它负责认证、鉴权、准入控制和 RESTful API 暴露。' },
-          { id: 'etcd', label: 'etcd', x: 120, y: 180, w: 160, h: 56, color: '#d2a8ff',
+          { id: 'etcd', label: 'etcd', x: 120, y: 180, w: 160, h: 56, color: '#a08bb5',
             info: 'etcd 是分布式键值存储，保存集群的所有状态数据：Pod 定义、Service、ConfigMap、Secret 等。API Server 是唯一与 etcd 直接通信的组件。' },
-          { id: 'scheduler', label: 'kube-scheduler', x: 120, y: 280, w: 160, h: 56, color: '#3fb950',
+          { id: 'scheduler', label: 'kube-scheduler', x: 120, y: 280, w: 160, h: 56, color: '#7c9a5e',
             info: 'Scheduler 监听新建的、尚未调度的 Pod，根据资源需求、亲和性规则、污点容忍等条件为其选择最优节点。' },
-          { id: 'controller', label: 'kube-controller-manager', x: 120, y: 380, w: 160, h: 56, color: '#f0883e',
+          { id: 'controller', label: 'kube-controller-manager', x: 120, y: 380, w: 180, h: 56, color: '#c96442',
             info: 'Controller Manager 运行多个控制器循环：Deployment Controller 维护副本数、Node Controller 处理节点故障、ReplicaSet Controller 管理Pod 副本等。' },
-          { id: 'kubelet', label: 'kubelet', x: 450, y: 140, w: 140, h: 56, color: '#f85149',
+          { id: 'kubelet', label: 'kubelet', x: 450, y: 140, w: 140, h: 56, color: '#b53333',
             info: 'kubelet 运行在每个 Worker 节点上，负责：监听 API Server 获取分配到本节点的 Pod，拉取镜像，启动/停止容器，汇报节点和 Pod 状态。' },
-          { id: 'kubeproxy', label: 'kube-proxy', x: 450, y: 260, w: 140, h: 56, color: '#d29922',
+          { id: 'kubeproxy', label: 'kube-proxy', x: 450, y: 260, w: 140, h: 56, color: '#c49a3c',
             info: 'kube-proxy 运行在每个节点上，维护 iptables/IPVS 规则，实现 Service 的负载均衡和网络代理，将 Service ClusterIP 的流量转发到后端 Pod。' }
         ];
 
         engine.drawText('☸ 控制面组件', 200, 30, {
-          color: '#58a6ff', fontSize: 16, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#d97757', fontSize: 16, fontWeight: '600', align: 'center', baseline: 'middle'
         });
         engine.drawText('工作节点组件', 520, 80, {
-          color: '#f85149', fontSize: 14, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#b53333', fontSize: 14, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
-        engine.drawLine(350, 60, 350, 440, { color: '#30363d', dashed: [4, 4] });
+        engine.drawLine(350, 60, 350, 440, { color: '#5e5d59', dashed: [4, 4] });
 
         components.forEach(comp => {
           engine.drawNode(comp.x, comp.y, comp.w, comp.h, comp.label, {
@@ -48,13 +48,13 @@ window.K8sModules['architecture'] = {
           });
         });
 
-        engine.drawArrow(280, 108, 280, 180, { color: '#30363d' });
-        engine.drawArrow(280, 208, 280, 280, { color: '#30363d' });
-        engine.drawArrow(280, 308, 280, 380, { color: '#30363d' });
-        engine.drawCurvedArrow(280, 136, 450, 168, { color: '#30363d', curvature: 0.2 });
+        engine.drawArrow(280, 108, 280, 180, { color: '#5e5d59' });
+        engine.drawArrow(280, 208, 280, 280, { color: '#5e5d59' });
+        engine.drawArrow(280, 308, 280, 380, { color: '#5e5d59' });
+        engine.drawCurvedArrow(280, 136, 450, 168, { color: '#5e5d59', curvature: 0.2 });
 
         engine.drawText('💡 点击任意组件查看详情', engine.width / 2, engine.height - 40, {
-          color: '#484f58', fontSize: 13, align: 'center', baseline: 'middle'
+          color: '#5e5d59', fontSize: 13, align: 'center', baseline: 'middle'
         });
 
         let explored = new Set();
@@ -85,10 +85,10 @@ window.K8sModules['architecture'] = {
 
         const masterX = 300, masterY = 60, masterW = 380, masterH = 380;
         engine.drawRect(masterX, masterY, masterW, masterH, {
-          fillColor: '#0d1117', borderColor: '#58a6ff', borderWidth: 2, radius: 12
+          fillColor: '#141413', borderColor: '#d97757', borderWidth: 2, radius: 12
         });
         engine.drawText('Master 控制面', masterX + masterW / 2, masterY + 20, {
-          color: '#58a6ff', fontSize: 14, fontWeight: '600', align: 'center'
+          color: '#d97757', fontSize: 14, fontWeight: '600', align: 'center'
         });
 
         const targets = [
@@ -100,19 +100,19 @@ window.K8sModules['architecture'] = {
 
         targets.forEach(t => {
           engine.drawRect(t.x, t.y, t.w, t.h, {
-            fillColor: '#0d1117', borderColor: '#484f58', borderWidth: 1, radius: 6, dashed: true,
+            fillColor: '#141413', borderColor: '#5e5d59', borderWidth: 1, radius: 6, dashed: true,
             id: t.id, interactive: true, data: t
           });
           engine.drawText('拖入 ' + t.label, t.x + t.w / 2, t.y + t.h / 2, {
-            color: '#484f58', fontSize: 11, align: 'center', baseline: 'middle'
+            color: '#5e5d59', fontSize: 11, align: 'center', baseline: 'middle'
           });
         });
 
         const sources = [
-          { id: 'apiserver', label: 'kube-apiserver', x: 40, y: 100, w: 130, h: 44, color: '#58a6ff' },
-          { id: 'etcd', label: 'etcd', x: 40, y: 170, w: 130, h: 44, color: '#d2a8ff' },
-          { id: 'scheduler', label: 'kube-scheduler', x: 40, y: 240, w: 130, h: 44, color: '#3fb950' },
-          { id: 'controller', label: 'controller-manager', x: 40, y: 310, w: 130, h: 44, color: '#f0883e' }
+          { id: 'apiserver', label: 'kube-apiserver', x: 40, y: 100, w: 130, h: 44, color: '#d97757' },
+          { id: 'etcd', label: 'etcd', x: 40, y: 170, w: 130, h: 44, color: '#a08bb5' },
+          { id: 'scheduler', label: 'kube-scheduler', x: 40, y: 240, w: 130, h: 44, color: '#7c9a5e' },
+          { id: 'controller', label: 'controller-manager', x: 40, y: 310, w: 150, h: 44, color: '#c96442' }
         ];
 
         sources.sort(() => Math.random() - 0.5);
@@ -126,7 +126,7 @@ window.K8sModules['architecture'] = {
         });
 
         engine.drawText('📦 将左侧组件拖入右侧对应位置', engine.width / 2, engine.height - 40, {
-          color: '#484f58', fontSize: 13, align: 'center', baseline: 'middle'
+          color: '#5e5d59', fontSize: 13, align: 'center', baseline: 'middle'
         });
 
         let placed = 0;
@@ -147,7 +147,7 @@ window.K8sModules['architecture'] = {
                 setTimeout(() => app.onChallengeComplete('architecture', 1, false), 1500);
               }
             } else {
-              app.showFeedback('error', '❌ 位置不对，再想想这个组件的职责是什么？', 2000);
+              app.showFeedback('error', '❌ 位置不对，再想想这个组件的职责是什么？', 1500);
             }
           }
         });
@@ -163,17 +163,17 @@ window.K8sModules['architecture'] = {
         engine.clear();
 
         const steps = [
-          { id: 'kubectl', label: 'kubectl', x: 80, y: 200, w: 100, h: 50, color: '#8b949e',
+          { id: 'kubectl', label: 'kubectl', x: 80, y: 200, w: 100, h: 50, color: '#87867f',
             hint: '用户通过 kubectl 发送创建请求' },
-          { id: 'apiserver', label: 'API Server', x: 240, y: 200, w: 130, h: 50, color: '#58a6ff',
+          { id: 'apiserver', label: 'API Server', x: 240, y: 200, w: 130, h: 50, color: '#d97757',
             hint: '请求到达 API Server，经过认证、鉴权、准入控制' },
-          { id: 'etcd', label: 'etcd', x: 420, y: 200, w: 100, h: 50, color: '#d2a8ff',
+          { id: 'etcd', label: 'etcd', x: 420, y: 200, w: 100, h: 50, color: '#a08bb5',
             hint: 'Pod 定义被持久化到 etcd' },
-          { id: 'scheduler', label: 'Scheduler', x: 240, y: 80, w: 130, h: 50, color: '#3fb950',
+          { id: 'scheduler', label: 'Scheduler', x: 240, y: 80, w: 130, h: 50, color: '#7c9a5e',
             hint: 'Scheduler 监听到未调度的 Pod，为其选择节点' },
-          { id: 'apiserver2', label: 'API Server', x: 420, y: 80, w: 130, h: 50, color: '#58a6ff',
+          { id: 'apiserver2', label: 'API Server', x: 420, y: 80, w: 130, h: 50, color: '#d97757',
             hint: 'Scheduler 将调度结果写回 API Server' },
-          { id: 'kubelet', label: 'kubelet', x: 600, y: 140, w: 110, h: 50, color: '#f85149',
+          { id: 'kubelet', label: 'kubelet', x: 600, y: 140, w: 110, h: 50, color: '#b53333',
             hint: 'kubelet 监听到 Pod 分配到本节点，开始创建容器' }
         ];
 
@@ -186,18 +186,18 @@ window.K8sModules['architecture'] = {
           });
         });
 
-        engine.drawArrow(180, 225, 240, 225, { color: '#30363d', dashed: [3, 3] });
-        engine.drawArrow(370, 225, 420, 225, { color: '#30363d', dashed: [3, 3] });
-        engine.drawCurvedArrow(470, 200, 305, 130, { color: '#30363d', dashed: [3, 3], curvature: -0.3 });
-        engine.drawArrow(370, 105, 420, 105, { color: '#30363d', dashed: [3, 3] });
-        engine.drawCurvedArrow(550, 105, 655, 165, { color: '#30363d', dashed: [3, 3], curvature: 0.2 });
+        engine.drawArrow(180, 225, 240, 225, { color: '#5e5d59', dashed: [3, 3] });
+        engine.drawArrow(370, 225, 420, 225, { color: '#5e5d59', dashed: [3, 3] });
+        engine.drawCurvedArrow(470, 200, 305, 130, { color: '#5e5d59', dashed: [3, 3], curvature: -0.3 });
+        engine.drawArrow(370, 105, 420, 105, { color: '#5e5d59', dashed: [3, 3] });
+        engine.drawCurvedArrow(550, 105, 655, 165, { color: '#5e5d59', dashed: [3, 3], curvature: 0.2 });
 
         engine.drawText('🚀 Pod 创建请求的流转路径', engine.width / 2, 25, {
-          color: '#e6edf3', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
+          color: '#faf9f5', fontSize: 15, fontWeight: '600', align: 'center', baseline: 'middle'
         });
 
         engine.drawText('💡 按正确顺序点击组件，模拟请求流转', engine.width / 2, engine.height - 40, {
-          color: '#484f58', fontSize: 13, align: 'center', baseline: 'middle'
+          color: '#5e5d59', fontSize: 13, align: 'center', baseline: 'middle'
         });
 
         interactions.enableSequence(correctOrder, {
@@ -212,7 +212,7 @@ window.K8sModules['architecture'] = {
           },
           onWrongStep(id, expectedIdx) {
             const correctStep = steps[expectedIdx];
-            app.showFeedback('error', '❌ 顺序不对！下一个应该是「' + correctStep.label + '」— 提示：' + correctStep.hint, 3000);
+            app.showFeedback('error', '❌ 顺序不对！下一个应该是「' + correctStep.label + '」— 提示：' + correctStep.hint, 1500);
           },
           onComplete() {
             setTimeout(() => app.onChallengeComplete('architecture', 2, false), 1000);
@@ -231,10 +231,10 @@ window.K8sModules['architecture'] = {
 
         const nodeX = 280, nodeY = 60, nodeW = 400, nodeH = 380;
         engine.drawRect(nodeX, nodeY, nodeW, nodeH, {
-          fillColor: '#0d1117', borderColor: '#f85149', borderWidth: 2, radius: 12
+          fillColor: '#141413', borderColor: '#b53333', borderWidth: 2, radius: 12
         });
         engine.drawText('Worker Node', nodeX + nodeW / 2, nodeY + 20, {
-          color: '#f85149', fontSize: 14, fontWeight: '600', align: 'center'
+          color: '#b53333', fontSize: 14, fontWeight: '600', align: 'center'
         });
 
         const targets = [
@@ -245,26 +245,26 @@ window.K8sModules['architecture'] = {
 
         targets.forEach(t => {
           engine.drawRect(t.x, t.y, t.w, t.h, {
-            fillColor: '#0d1117', borderColor: '#484f58', radius: 6,
+            fillColor: '#141413', borderColor: '#5e5d59', radius: 6,
             id: t.id, interactive: true, data: t
           });
           engine.drawText('拖入 ' + t.label, t.x + t.w / 2, t.y + t.h / 2, {
-            color: '#484f58', fontSize: 11, align: 'center', baseline: 'middle'
+            color: '#5e5d59', fontSize: 11, align: 'center', baseline: 'middle'
           });
         });
 
-        engine.drawRect(370, 310, 80, 50, { fillColor: '#3fb95011', borderColor: '#3fb950', radius: 6 });
-        engine.drawText('Pod', 410, 335, { color: '#3fb950', fontSize: 11, align: 'center', baseline: 'middle' });
-        engine.drawRect(470, 310, 80, 50, { fillColor: '#3fb95011', borderColor: '#3fb950', radius: 6 });
-        engine.drawText('Pod', 510, 335, { color: '#3fb950', fontSize: 11, align: 'center', baseline: 'middle' });
+        engine.drawRect(370, 310, 80, 50, { fillColor: '#7c9a5e11', borderColor: '#7c9a5e', radius: 6 });
+        engine.drawText('Pod', 410, 335, { color: '#7c9a5e', fontSize: 11, align: 'center', baseline: 'middle' });
+        engine.drawRect(470, 310, 80, 50, { fillColor: '#7c9a5e11', borderColor: '#7c9a5e', radius: 6 });
+        engine.drawText('Pod', 510, 335, { color: '#7c9a5e', fontSize: 11, align: 'center', baseline: 'middle' });
         engine.drawText('（运行时负责启动这些 Pod）', nodeX + nodeW / 2, 375, {
-          color: '#484f58', fontSize: 10, align: 'center', baseline: 'middle'
+          color: '#5e5d59', fontSize: 10, align: 'center', baseline: 'middle'
         });
 
         const sources = [
-          { id: 'kubelet', label: 'kubelet', color: '#f85149' },
-          { id: 'kubeproxy', label: 'kube-proxy', color: '#d29922' },
-          { id: 'runtime', label: '容器运行时 (CRI)', color: '#3fb950' }
+          { id: 'kubelet', label: 'kubelet', color: '#b53333' },
+          { id: 'kubeproxy', label: 'kube-proxy', color: '#c49a3c' },
+          { id: 'runtime', label: '容器运行时 (CRI)', color: '#7c9a5e' }
         ];
 
         sources.sort(() => Math.random() - 0.5);
@@ -279,11 +279,11 @@ window.K8sModules['architecture'] = {
           });
         });
 
-        engine.drawArrow(480, 275, 430, 310, { color: '#30363d', dashed: [3, 3] });
-        engine.drawArrow(480, 275, 530, 310, { color: '#30363d', dashed: [3, 3] });
+        engine.drawArrow(480, 275, 430, 310, { color: '#5e5d59', dashed: [3, 3] });
+        engine.drawArrow(480, 275, 530, 310, { color: '#5e5d59', dashed: [3, 3] });
 
         engine.drawText('📦 将组件拖入 Worker Node', engine.width / 2, engine.height - 40, {
-          color: '#484f58', fontSize: 13, align: 'center', baseline: 'middle'
+          color: '#5e5d59', fontSize: 13, align: 'center', baseline: 'middle'
         });
 
         let placed = 0;
@@ -297,12 +297,12 @@ window.K8sModules['architecture'] = {
               });
               animations.emitParticles(engine, tgt.x + tgt.w / 2, tgt.y + tgt.h / 2, src.color, 15);
               placed++;
-              app.showFeedback('success', '✅ ' + src.label + ' 放置正确！', 2000);
+              app.showFeedback('success', '✅ ' + src.label + ' 放置正确！', 1500);
               if (placed >= sources.length) {
                 setTimeout(() => app.onChallengeComplete('architecture', 3, false), 1500);
               }
             } else {
-              app.showFeedback('error', '❌ 位置不对，想想这个组件在节点上负责什么？', 2000);
+              app.showFeedback('error', '❌ 位置不对，想想这个组件在节点上负责什么？', 1500);
             }
           }
         });

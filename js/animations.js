@@ -1,9 +1,11 @@
 /**
  * Animations — 动画系统
  * 缓动、粒子、路径流动、脉冲效果
+ * 所有动画绘制在独立的 overlay canvas 上，不影响静态内容
  */
 class AnimationManager {
-  constructor() {
+  constructor(engine) {
+    this.engine = engine;
     this.tweens = [];
     this.particles = [];
     this.pulses = [];
@@ -32,11 +34,25 @@ class AnimationManager {
     this.particles = [];
     this.pulses = [];
     this.flows = [];
+    // Clear overlay canvas
+    const ctx = this.engine.animCtx;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.engine.animCanvas.width, this.engine.animCanvas.height);
+    ctx.restore();
   }
 
   _loop() {
     if (!this.running) return;
     const now = performance.now();
+
+    // Clear overlay canvas at the start of each frame
+    const ctx = this.engine.animCtx;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.engine.animCanvas.width, this.engine.animCanvas.height);
+    ctx.restore();
+
     this._updateTweens(now);
     this._updateParticles(now);
     this._updatePulses(now);
@@ -97,71 +113,72 @@ class AnimationManager {
 
   /* ===== 粒子效果 ===== */
 
-  emitParticles(engine, x, y, color, count = 12) {
+  emitParticles(engine, cx, cy, color, count = 12) {
     for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-      const speed = 1 + Math.random() * 2;
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const speed = 0.5 + Math.random() * 1.5;
       this.particles.push({
-        engine,
-        x, y,
+        x: cx, y: cy,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         color,
+        size: 2 + Math.random() * 3,
         life: 1,
-        decay: 0.015 + Math.random() * 0.01,
-        size: 2 + Math.random() * 3
+        decay: 0.015 + Math.random() * 0.01
       });
     }
     if (!this.running) this.start();
   }
 
   _updateParticles() {
+    const ctx = this.engine.animCtx;
     this.particles = this.particles.filter(p => {
       p.x += p.vx;
       p.y += p.vy;
       p.life -= p.decay;
       if (p.life <= 0) return false;
 
-      p.engine.ctx.save();
-      p.engine.ctx.globalAlpha = p.life;
-      p.engine.ctx.fillStyle = p.color;
-      p.engine.ctx.beginPath();
-      p.engine.ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      p.engine.ctx.fill();
-      p.engine.ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
       return true;
     });
   }
 
   /* ===== 脉冲效果 ===== */
 
-  addPulse(engine, x, y, color, options = {}) {
-    const pulse = {
-      engine, x, y, color,
-      maxRadius: options.maxRadius || 20,
-      duration: options.duration || 1500,
+  addPulse(engine, cx, cy, color, duration = 2000) {
+    this.pulses.push({
+      x: cx, y: cy,
+      color,
+      maxRadius: 40,
+      duration,
       startTime: performance.now()
-    };
-    this.pulses.push(pulse);
+    });
     if (!this.running) this.start();
-    return pulse;
   }
 
   _updatePulses(now) {
+    const ctx = this.engine.animCtx;
     this.pulses = this.pulses.filter(p => {
       const elapsed = now - p.startTime;
-      const progress = (elapsed % p.duration) / p.duration;
+      if (elapsed > p.duration) return false;
+      const progress = elapsed / p.duration;
       const radius = p.maxRadius * progress;
       const alpha = 1 - progress;
 
-      p.engine.ctx.save();
-      p.engine.ctx.globalAlpha = alpha * 0.3;
-      p.engine.ctx.strokeStyle = p.color;
-      p.engine.ctx.lineWidth = 2;
-      p.engine.ctx.beginPath();
-      p.engine.ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-      p.engine.ctx.stroke();
-      p.engine.ctx.restore();
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.3;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
       return true;
     });
   }
@@ -170,7 +187,6 @@ class AnimationManager {
 
   flowAlongPath(engine, points, color, options = {}) {
     const flow = {
-      engine,
       points,
       color,
       speed: options.speed || 0.002,
@@ -178,8 +194,7 @@ class AnimationManager {
       progress: 0,
       onReachPoint: options.onReachPoint || null,
       lastPointIndex: -1,
-      prevX: null,
-      prevY: null
+      trail: []
     };
     this.flows.push(flow);
     if (!this.running) this.start();
@@ -187,10 +202,12 @@ class AnimationManager {
   }
 
   _updateFlows() {
+    const ctx = this.engine.animCtx;
     this.flows = this.flows.filter(f => {
       f.progress += f.speed;
       if (f.progress >= 1) {
         f.progress = 0;
+        f.trail = [];
       }
 
       const totalSegments = f.points.length - 1;
@@ -207,28 +224,32 @@ class AnimationManager {
       const x = p1.x + (p2.x - p1.x) * segProgress;
       const y = p1.y + (p2.y - p1.y) * segProgress;
 
-      // 清除上一个位置的 dot（使用比 dot 稍大的区域避免残留）
-      if (f.prevX !== null && f.prevY !== null) {
-        f.engine.ctx.save();
-        f.engine.ctx.globalCompositeOperation = 'destination-out';
-        f.engine.ctx.fillStyle = 'rgba(0,0,0,1)';
-        f.engine.ctx.beginPath();
-        f.engine.ctx.arc(f.prevX, f.prevY, f.dotSize + 3, 0, Math.PI * 2);
-        f.engine.ctx.fill();
-        f.engine.ctx.restore();
-      }
+      // Maintain trail for comet effect
+      f.trail.push({ x, y });
+      if (f.trail.length > 12) f.trail.shift();
 
-      f.prevX = x;
-      f.prevY = y;
+      // Draw trail
+      f.trail.forEach((pt, i) => {
+        const alpha = (i / f.trail.length) * 0.4;
+        const size = f.dotSize * (i / f.trail.length) * 0.8;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
 
-      f.engine.ctx.save();
-      f.engine.ctx.fillStyle = f.color;
-      f.engine.ctx.shadowColor = f.color;
-      f.engine.ctx.shadowBlur = 10;
-      f.engine.ctx.beginPath();
-      f.engine.ctx.arc(x, y, f.dotSize, 0, Math.PI * 2);
-      f.engine.ctx.fill();
-      f.engine.ctx.restore();
+      // Draw main dot with glow
+      ctx.save();
+      ctx.fillStyle = f.color;
+      ctx.shadowColor = f.color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(x, y, f.dotSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
       return true;
     });
