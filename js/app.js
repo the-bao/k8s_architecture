@@ -93,7 +93,11 @@ const App = {
   navigate(moduleId) {
     if (!Game.isModuleUnlocked(moduleId)) return;
 
-    if (this.currentModule === moduleId && this.currentChallenge !== null) return;
+    // 如果点击同一模块且在挑战中，返回模块概览（不退出挑战）
+    if (this.currentModule === moduleId && this.currentChallenge !== null) {
+      this._renderModuleOverview(moduleId);
+      return;
+    }
 
     this.currentModule = moduleId;
     this.currentChallenge = null;
@@ -128,6 +132,9 @@ const App = {
     document.getElementById('btn-learn').classList.add('hidden');
 
     challenge.render(this.engine, this.animations, this.interactions, this);
+
+    // Re-enable interactions after challenge renders
+    this.interactions.enable();
   },
 
   showFeedback(type, message, duration = 3000) {
@@ -229,6 +236,13 @@ const App = {
     document.getElementById('btn-reset').addEventListener('click', () => {
       if (this.currentChallenge !== null) {
         this.startChallenge(this.currentChallenge);
+      }
+    });
+
+    document.getElementById('btn-learn').addEventListener('click', () => {
+      // "先学习" 显示模块概述（复习知识点）
+      if (this.currentModule) {
+        this._renderModuleOverview(this.currentModule);
       }
     });
   }

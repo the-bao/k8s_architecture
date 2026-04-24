@@ -10,7 +10,8 @@ class InteractionManager {
     this.handlers = [];
     this._dragState = null;
     this._enabled = true;
-    this._clickedIds = new Set(); // 防止同一元素重复触发
+    // 用于防止快速重复点击（300ms 内只能点击一次同一元素）
+    this._recentClicks = new Map();
   }
 
   destroy() {
@@ -19,12 +20,12 @@ class InteractionManager {
       this.canvas.removeEventListener(h.type, h.handler);
     });
     this.handlers = [];
-    this._clickedIds.clear();
+    this._recentClicks.clear();
   }
 
   enable() {
     this._enabled = true;
-    this._clickedIds.clear(); // 重新启用时清除
+    this._recentClicks.clear();
   }
 
   disable() { this._enabled = false; }
@@ -45,9 +46,11 @@ class InteractionManager {
       const pos = this._getCanvasPos(e);
       const hit = this.engine.hitTest(pos.x, pos.y);
       if (hit && elementIds.includes(hit.id)) {
-        // 防止同一元素在当前交互周期内重复触发
-        if (this._clickedIds.has(hit.id)) return;
-        this._clickedIds.add(hit.id);
+        // 防止快速重复点击（300ms 冷却期）
+        const now = Date.now();
+        const lastClick = this._recentClicks.get(hit.id) || 0;
+        if (now - lastClick < 300) return;
+        this._recentClicks.set(hit.id, now);
         callback(hit.id, hit.data, pos);
       }
     };
@@ -167,7 +170,9 @@ class InteractionManager {
     const onWrongStep = options.onWrongStep || null;
     const onComplete = options.onComplete || null;
     let currentStep = 0;
-    // 记录已完成的步骤，防止重复触发
+
+    // 序列交互不使用 _recentClicks 防抖，因为需要按正确顺序点击
+    // completedSteps 用于防止已经完成的步骤重复触发
     const completedSteps = new Set();
 
     const handler = (e) => {
@@ -187,6 +192,7 @@ class InteractionManager {
         }
       } else if (!completedSteps.has(hit.id)) {
         // 只有未完成的元素才会触发错误提示
+        // 错误点击不阻止用户重新点击（因为 completedSteps 中没有）
         if (onWrongStep) onWrongStep(hit.id, currentStep);
       }
     };

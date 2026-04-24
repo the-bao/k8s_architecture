@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>K8s Architect — 交互式 Kubernetes 架构学习</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="manifest" href="manifest.json">
+  <!-- Manifest only loaded via JS when not using file:// protocol -->
 </head>
 <body>
   <!-- 顶部状态栏 -->
@@ -70,11 +71,23 @@
 
   <!-- Service Worker Registration -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
+    // Only run when served over HTTP(S), not file://
+    (function() {
+      if (window.location.protocol === 'file:') return;
+
+      // Dynamically load manifest for PWA
+      const manifestLink = document.createElement('link');
+      manifestLink.rel = 'manifest';
+      manifestLink.href = 'manifest.json';
+      document.head.appendChild(manifestLink);
+
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+      }
+    })();
   </script>
 
   <!-- 脚本按依赖顺序加载 -->
