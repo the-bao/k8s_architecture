@@ -1,0 +1,466 @@
+/* ===== CSS Variables ===== */
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --border: #30363d;
+  --border-light: #484f58;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #f85149;
+  --purple: #d2a8ff;
+  --orange: #f0883e;
+  --sidebar-width: 220px;
+  --status-height: 48px;
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ===== Status Bar ===== */
+#status-bar {
+  height: var(--status-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  color: var(--blue);
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.tagline {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.level-badge {
+  background: var(--bg-tertiary);
+  color: var(--green);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.xp-display {
+  color: var(--purple);
+  font-size: 12px;
+}
+
+.xp-bar-container {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  width: 80px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.xp-bar {
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+/* ===== Main Layout ===== */
+.main-layout {
+  display: flex;
+  height: calc(100vh - var(--status-height));
+}
+
+/* ===== Sidebar ===== */
+#sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  padding: 12px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.sidebar-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.module-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.module-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.module-item.active {
+  background: rgba(31, 111, 235, 0.1);
+  border-left-color: var(--blue);
+}
+
+.module-item.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.module-item.completed {
+  border-left-color: var(--green);
+}
+
+.module-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.module-item.active .module-title {
+  color: var(--blue);
+}
+
+.module-item.locked .module-title {
+  color: var(--text-muted);
+}
+
+.module-progress {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.module-progress-bar {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  width: 60px;
+  height: 4px;
+  overflow: hidden;
+}
+
+.module-progress-fill {
+  background: var(--blue);
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.module-progress-text {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.module-status {
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.module-status.completed {
+  color: var(--green);
+}
+
+.module-status.locked {
+  color: var(--text-muted);
+}
+
+/* ===== Main Content ===== */
+#main-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#canvas-container {
+  width: 100%;
+  height: 100%;
+}
+
+#main-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+}
+
+/* ===== Challenge Card ===== */
+.challenge-card {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(22, 27, 34, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  max-width: 320px;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.challenge-card.hidden {
+  display: none;
+}
+
+.challenge-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+
+.challenge-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.challenge-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ===== Feedback Bubble ===== */
+.feedback-bubble {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 27, 34, 0.95);
+  border-radius: 10px;
+  padding: 14px 20px;
+  max-width: 500px;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  backdrop-filter: blur(8px);
+  animation: slideUp 0.3s ease;
+}
+
+.feedback-bubble.hidden {
+  display: none;
+}
+
+.feedback-bubble.success {
+  border: 1px solid var(--green);
+}
+
+.feedback-bubble.error {
+  border: 1px solid var(--red);
+}
+
+.feedback-bubble.info {
+  border: 1px solid var(--yellow);
+}
+
+.feedback-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.feedback-text {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ===== Tooltip Bubble ===== */
+.tooltip-bubble {
+  position: absolute;
+  background: rgba(22, 27, 34, 0.95);
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  padding: 10px 14px;
+  max-width: 280px;
+  z-index: 15;
+  backdrop-filter: blur(8px);
+}
+
+.tooltip-bubble.hidden {
+  display: none;
+}
+
+.tooltip-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+
+.tooltip-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ===== Bottom Bar ===== */
+.bottom-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2ea043;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+.btn-choice {
+  background: var(--bg-tertiary);
+  color: var(--blue);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  padding: 5px 12px;
+}
+
+.btn-choice:hover {
+  border-color: var(--blue);
+}
+
+.btn-choice.correct {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.btn-choice.wrong {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(248, 81, 73, 0.1);
+}
+
+/* ===== Choice Options ===== */
+.choice-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.choice-option {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.choice-option:hover {
+  border-color: var(--blue);
+}
+
+.choice-option.selected {
+  border-color: var(--blue);
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.choice-option.correct {
+  border-color: var(--green);
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.choice-option.wrong {
+  border-color: var(--red);
+  background: rgba(248, 81, 73, 0.1);
+}
+
+/* ===== Utility ===== */
+.hidden {
+  display: none !important;
+}
+
+/* ===== Responsive (Tablet) ===== */
+@media (max-width: 768px) {
+  #sidebar {
+    width: 180px;
+  }
+
+  .challenge-card {
+    max-width: 240px;
+  }
+}
