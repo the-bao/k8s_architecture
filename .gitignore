@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Test artifacts
+tests/
+playwright-report/
+playwright-trace/
+*.png
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# System
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Superpowers
+.superpowers/
+
+# Local files
+*.local

@@ -177,7 +177,9 @@ class AnimationManager {
       dotSize: options.dotSize || 5,
       progress: 0,
       onReachPoint: options.onReachPoint || null,
-      lastPointIndex: -1
+      lastPointIndex: -1,
+      prevX: null,
+      prevY: null
     };
     this.flows.push(flow);
     if (!this.running) this.start();
@@ -204,6 +206,20 @@ class AnimationManager {
       const p2 = f.points[segIndex + 1];
       const x = p1.x + (p2.x - p1.x) * segProgress;
       const y = p1.y + (p2.y - p1.y) * segProgress;
+
+      // 清除上一个位置的 dot（使用比 dot 稍大的区域避免残留）
+      if (f.prevX !== null && f.prevY !== null) {
+        f.engine.ctx.save();
+        f.engine.ctx.globalCompositeOperation = 'destination-out';
+        f.engine.ctx.fillStyle = 'rgba(0,0,0,1)';
+        f.engine.ctx.beginPath();
+        f.engine.ctx.arc(f.prevX, f.prevY, f.dotSize + 3, 0, Math.PI * 2);
+        f.engine.ctx.fill();
+        f.engine.ctx.restore();
+      }
+
+      f.prevX = x;
+      f.prevY = y;
 
       f.engine.ctx.save();
       f.engine.ctx.fillStyle = f.color;

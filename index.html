@@ -68,6 +68,15 @@
     </main>
   </div>
 
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+
   <!-- 脚本按依赖顺序加载 -->
   <script src="js/progress-store.js"></script>
   <script src="js/game.js"></script>
