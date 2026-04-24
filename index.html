@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K8s Architect — 交互式 Kubernetes 架构学习</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- 顶部状态栏 -->
+  <header id="status-bar">
+    <div class="status-left">
+      <span class="logo">☸ K8s Architect</span>
+      <span class="tagline">交互式架构学习</span>
+    </div>
+    <div class="status-right">
+      <span id="level-badge" class="level-badge">Lv.1 学徒</span>
+      <span id="xp-display" class="xp-display">0 经验</span>
+      <div class="xp-bar-container">
+        <div id="xp-bar" class="xp-bar" style="width: 0%"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- 侧边导航 -->
+    <nav id="sidebar">
+      <div class="sidebar-label">学习模块</div>
+      <div id="module-list"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-label">学习进度</div>
+        <div id="progress-stats"></div>
+      </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main id="main-content">
+      <div id="canvas-container">
+        <canvas id="main-canvas"></canvas>
+      </div>
+
+      <!-- 挑战卡（右上角覆盖） -->
+      <div id="challenge-card" class="challenge-card hidden">
+        <div id="challenge-title" class="challenge-title"></div>
+        <div id="challenge-desc" class="challenge-desc"></div>
+        <div id="challenge-actions" class="challenge-actions"></div>
+      </div>
+
+      <!-- 反馈气泡 -->
+      <div id="feedback-bubble" class="feedback-bubble hidden">
+        <div id="feedback-icon" class="feedback-icon"></div>
+        <div id="feedback-text" class="feedback-text"></div>
+      </div>
+
+      <!-- 知识点气泡 -->
+      <div id="tooltip-bubble" class="tooltip-bubble hidden">
+        <div id="tooltip-title" class="tooltip-title"></div>
+        <div id="tooltip-text" class="tooltip-text"></div>
+      </div>
+
+      <!-- 底部操作栏 -->
+      <div id="bottom-bar" class="bottom-bar">
+        <button id="btn-start" class="btn btn-primary">▶ 开始挑战</button>
+        <button id="btn-learn" class="btn btn-secondary">📖 先学习</button>
+        <button id="btn-reset" class="btn btn-secondary">🔄 重置</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 脚本按依赖顺序加载 -->
+  <script src="js/progress-store.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/canvas-engine.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/modules/architecture.js"></script>
+  <script src="js/modules/pod-lifecycle.js"></script>
+  <script src="js/modules/network.js"></script>
+  <script src="js/modules/storage-k8s.js"></script>
+  <script src="js/modules/security.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
